@@ -30,21 +30,32 @@
 //
 // console.log('服务已经启动：http:127.0.0.1:' + config.port);
 
-let server = require('./server');
-let route = require('./route');
+// let server = require('./server');
+// let route = require('./route');
+// server.start(route.route)
 
-function test () {
-  return new Promise((resolve, reject) => {
-    setTimeout(function () {
-      console.log('...................')
-      resolve('finish')
-    }, 4000)
-  })
-}
-async function test2() {
-  const result = await test()
-  console.log("...4....", result)
-}
-test2();
+// function test () {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(function () {
+//       console.log('...................')
+//       resolve('finish')
+//     }, 4000)
+//   })
+// }
+// async function test2() {
+//   const result = await test()
+//   console.log("...4....", result)
+// }
+// test2();
 
-server.start(route.route)
+const path = require('path');
+const ls = require('../ls');
+
+console.log('......', path.resolve(__dirname, '../'))
+
+const instance = new ls({
+  root_path: path.resolve(__dirname, '../'),
+  app_path: __dirname
+});
+
+instance.run();
