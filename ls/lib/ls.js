@@ -31,36 +31,31 @@
  **                                              不见满街漂亮妹，哪个归得程序员？
  */
 /**
- * Created by liangshan on 2017/11/13.
+ * Created by liangshan on 2017/11/14.
  */
-
 const path = require('path');
 const http = require('http');
-const koa = require('koa');
-const util = require('./util/index');
-const config = require('./config/config');
-const pkg = require('../package.json');
+const lsHttp = require('./http.js');
+const util = require('../util/index');
+let config = require('./config/config');
+const loader = require('../util/loader');
 const controller = require('./controller/base');
-
-global.ls = {};
+global.ls = {}
 
 module.exports = class {
   constructor (options = {}) {
     this.options = options;
-    this.koa = new koa();
-    this.init();
+    this.init()
   }
 
   init () {
     const root_path = this.options.root_path || process.env.root_path || process.cwd();
     const app_path = path.resolve(root_path, this.options.app_path || process.env.app_path || 'app');
 
+    ls.controller = {}
     util.define(ls, 'root_path', root_path);
     util.define(ls, 'app_path', app_path);
-    util.define(ls, 'app', this.koa);
     util.define(ls.controller, 'base', controller);
-    util.define(ls, 'version', pkg.version);
-
     // 缓存
     Object.defineProperty(ls, '_caches', {
       value: {},
@@ -70,46 +65,31 @@ module.exports = class {
     });
   }
 
-  /**
-   * 注册异常处理
-   *
-   */
-  captureError() {
-    //koa 错误
-    ls.app.on('error', (err, ctx) => {
-      console.log(err, 'ERROR');
-    });
-
-    //promise reject错误
-    process.on('unhandledRejection', (reason, promise) => {
-      console.log(reason, 'ERROR');
-    });
-
-    //未知错误
-    process.on('uncaughtException', err => {
-      console.log(err, 'ERROR');
-      if (err.message.indexOf(' EADDRINUSE ') > -1) {
-        process.exit();
-      }
-    });
+  loadConfigs () {
+    ls._caches.configs = util.extend(ls._caches.configs, this.options.config, true)
   }
 
   loadControllers () {
-    console.log('controller path: ', ls.app_path)
+    const groups = config.groups;
+    ls._caches.controllers = {};
+    // groups.forEach(function (g) {
+    //   console.log('.>>> load controller group: ', g);
+    // })
+    new loader(ls.app_path, groups)
   }
 
   createServer () {
     if (!this.server) {
-      this.server = http.createServer(ls.app.callback());
+      this.server = http.createServer(lsHttp);
     }
-    this.server.listen(config.app_port || 3000);
-    console.log(`服务已经启动: http://127.0.0.1:${config.app_port}`);
+    this.server.listen(ls._caches.configs.app_port || 3000);
+    util.define(ls, 'server', this.server);
+    console.log(`服务已经启动: http://127.0.0.1:${ls._caches.configs.app_port}`);
   }
 
   run () {
-    this.loadControllers();
-    this.captureError();
+    this.loadConfigs();
+    // this.loadControllers();
     this.createServer();
   }
 }
-

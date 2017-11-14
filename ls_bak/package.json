@@ -16,5 +16,8 @@
     "koa"
   ],
   "author": "cheenoalive@gmail.com",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "path-to-regexp": "^2.1.0"
+  }
 }

@@ -33,8 +33,14 @@
 /**
  * Created by liangshan on 2017/11/14.
  */
-module.exports = {
-  app_port: 8031,
-  default_group: 'Home',
-  groups: ['Home']
+const loader = require('../util/loader');
+module.exports = function (ctx, ctx2) {
+  // ls.http = ctx;
+  // ls.ctx = ctx;
+  ls.request = ctx;
+  ls.response = ctx2
+  ls._caches.controllers = {};
+  new loader(ls.app_path, ls._caches.configs.groups)
+
+  ls._caches.controllers['Home']['index']['indexAction']();
 }

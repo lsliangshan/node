@@ -50,12 +50,14 @@
 
 const path = require('path');
 const ls = require('../ls');
+const config = require('./config/config');
 
 console.log('......', path.resolve(__dirname, '../'))
 
 const instance = new ls({
   root_path: path.resolve(__dirname, '../'),
-  app_path: __dirname
+  app_path: __dirname,
+  config: config
 });
 
 instance.run();
